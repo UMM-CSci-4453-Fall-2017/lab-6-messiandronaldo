@@ -1,0 +1,22 @@
+{
+  "name": "lab-6-messiandronaldo",
+  "version": "1.0.0",
+  "description": "Database lab 6",
+  "main": "showDatabases.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/UMM-CSci-4453-Fall-2017/lab-6-messiandronaldo.git"
+  },
+  "author": "Tony, Shawn, Jacob",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/UMM-CSci-4453-Fall-2017/lab-6-messiandronaldo/issues"
+  },
+  "homepage": "https://github.com/UMM-CSci-4453-Fall-2017/lab-6-messiandronaldo#readme",
+  "dependencies": {
+    "mysql": "^2.14.1"
+  }
+}
