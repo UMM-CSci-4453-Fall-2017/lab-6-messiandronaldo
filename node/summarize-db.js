@@ -1,6 +1,7 @@
 var credentials = require('./credentials.json');
 
 var mysql=require("mysql");
+var asy =require("async");
 
 credentials.host="ids";
 var connection = mysql.createConnection(credentials);
@@ -14,27 +15,35 @@ connection.connect(function(err){
   }
 });
 
-connection.query('SHOW DATABASES',function(err,rows,fields) {
-  var dbs;
-  if(err){
-    console.log('Error looking up databases');
-  } else {
-    dbs = rows;
-    for (var i = 0; i < dbs.length; i++) {
-      var db = dbs[i]['Database'];
-      console.log(db);
-      connection.query('SHOW TABLES from ' + db, function(err, rows, fields) {
-        if (err) {
-          console.log('Error looking up a table');
-        } else {
+connection.query('Show databases', function (err,rows,fields) {
+  // for each db
+  asy.each(rows, function (db, callback1) {
+    connection.query('Show tables from ' + db['Database'], function (err,rows,fields) {
+      // for each table
+      asy.each(rows, function (table, callback2) {
+        console.log('describe ' + db['Database'] + '.' + table['Tables_in_' + db['Database']]);
+        connection.query('describe ' + db['Database'] + '.' + table['Tables_in_' + db['Database']] + ';', function (err,rows,fields) {
           console.log(rows);
+        });
+        callback2();
+      }, function (err) {
+        if (err) {
+          console.log("Sth is wrong accesing tables");
+        } else {
+          console.log("Good");
+          callback1();
         }
+        // connection.end();
       });
+    });
+  }, function (err) {
+    if (err) {
+      console.log("Something is wrong accessing db names");
+    } else {
+      console.log("Gucci");
+       connection.end();
     }
-    connection.end();
-
-  }
+  });
 });
 
-//connection.end();
 console.log("All done now.");
