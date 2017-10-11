@@ -16,14 +16,18 @@ connection.connect(function(err){
 });
 
 connection.query('Show databases', function (err,rows,fields) {
+  var desMap = {};
+  var count;
   // for each db
   asy.each(rows, function (db, callback1) {
+    desMap[db['Database']] = {};
     connection.query('Show tables from ' + db['Database'], function (err,rows,fields) {
       // for each table
       asy.each(rows, function (table, callback2) {
-        console.log('describe ' + db['Database'] + '.' + table['Tables_in_' + db['Database']]);
-        connection.query('describe ' + db['Database'] + '.' + table['Tables_in_' + db['Database']] + ';', function (err,rows,fields) {
-          console.log(rows);
+
+        desMap[db['Database']][table["Tables_in_" + db['Database']]] = {};
+        connection.query('describe ' + db['Database'] + '.' + table['Tables_in_' + db['Database']], function (err,rows,fields) {
+          desMap[db['Database']][table["Tables_in_" + db['Database']]] = rows;
         });
         callback2();
       }, function (err) {
@@ -33,7 +37,6 @@ connection.query('Show databases', function (err,rows,fields) {
           console.log("Good");
           callback1();
         }
-        // connection.end();
       });
     });
   }, function (err) {
@@ -41,7 +44,8 @@ connection.query('Show databases', function (err,rows,fields) {
       console.log("Something is wrong accessing db names");
     } else {
       console.log("Gucci");
-       connection.end();
+      connection.end();
+      // Wait until desMap is filled
     }
   });
 });
