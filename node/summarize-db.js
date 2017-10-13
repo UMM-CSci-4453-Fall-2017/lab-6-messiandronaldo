@@ -1,7 +1,6 @@
 var credentials = require('./credentials.json');
 
 var mysql=require("mysql");
-var asy =require("async");
 
 credentials.host="ids";
 var connection = mysql.createConnection(credentials);
@@ -12,6 +11,7 @@ connection.connect(function(err){
     console.log("Problems with MySQL: "+err);
   } else {
     console.log("Connected to Database.");
+
   }
 });
 
@@ -23,10 +23,12 @@ function handler() {
         if (err) {
             console.log(err);
         } else {
+            console.log("\tAcquiring data.  This may take a bit...");
             handleDBs(rows, rows.length);
         }
     });
 }
+
 
 function handleDBs(dbs, dbNums) {
     var dbCount = 0;
@@ -43,6 +45,7 @@ function handleDBs(dbs, dbNums) {
     });
 }
 
+
 function handleTables(db, tables, tableNums, dbReady) {
     var tableCount = 0;
     tables.forEach(function (table) {
@@ -55,7 +58,7 @@ function handleTables(db, tables, tableNums, dbReady) {
                 handleDes(db, table, rows);
                 if (dbReady && tableCount == tableNums) {
                     connection.end();
-                    console.log(formatData);
+                    dataPrint();
                 }
             }
         });
@@ -63,10 +66,26 @@ function handleTables(db, tables, tableNums, dbReady) {
 }
 
 function handleDes(db, table, des) {
-    // console.log(db);
-    // console.log(table);
-    // console.log(des);
     formatData[db["Database"]][db["Database"] + '.' + table["Tables_in_"+db["Database"]]] = des;
+}
+
+
+function dataPrint(){
+  var dbs = Object.keys(formatData);
+  for(var i = 0; i < dbs.length; i++ ){
+    var db = dbs[i];
+    console.log("---|"+db+">");
+    var tables = Object.keys(formatData[db]);
+    for(var j = 0; j < tables.length; j++){
+      var table = tables[j];
+      console.log("......|"+db+"."+table+">");
+      var fields = formatData[db][table];
+        for(var x = 0; x < fields.length; x++){
+          var field = fields[x];
+          console.log("\tFieldName: `"+field["Field"]+"`\t"+field["Type"] );
+        }
+    }
+  }
 }
 
 handler();
