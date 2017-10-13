@@ -16,7 +16,7 @@ connection.connect(function(err){
 });
 
 // .query(queryString, cb)
-var formatStrings = {};
+var formatData = {};
 
 function handler() {
     connection.query("show databases", function(err, rows, fields) {
@@ -31,6 +31,7 @@ function handler() {
 function handleDBs(dbs, dbNums) {
     var dbCount = 0;
     dbs.forEach(function (db) {
+        formatData[db["Database"]] = {};
         connection.query("show tables from " + db["Database"], function(err, rows, fields) {
             if (err) {
                 console.log(err);
@@ -45,6 +46,7 @@ function handleDBs(dbs, dbNums) {
 function handleTables(db, tables, tableNums, dbReady) {
     var tableCount = 0;
     tables.forEach(function (table) {
+        formatData[db["Database"]][db["Database"] + '.' + table["Tables_in_"+db["Database"]]] = null;
         connection.query("describe " + db["Database"] + '.' + table["Tables_in_"+db["Database"]], function(err, rows, fields) {
             if (err) {
                 console.log(err);
@@ -53,6 +55,7 @@ function handleTables(db, tables, tableNums, dbReady) {
                 handleDes(db, table, rows);
                 if (dbReady && tableCount == tableNums) {
                     connection.end();
+                    console.log(formatData);
                 }
             }
         });
@@ -60,9 +63,10 @@ function handleTables(db, tables, tableNums, dbReady) {
 }
 
 function handleDes(db, table, des) {
-    console.log(db);
-    console.log(table);
-    console.log(des);
+    // console.log(db);
+    // console.log(table);
+    // console.log(des);
+    formatData[db["Database"]][db["Database"] + '.' + table["Tables_in_"+db["Database"]]] = des;
 }
 
 handler();
